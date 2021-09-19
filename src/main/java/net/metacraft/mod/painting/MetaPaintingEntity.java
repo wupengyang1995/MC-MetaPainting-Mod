@@ -123,6 +123,9 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         nbt.putString("Motive", Registry.PAINTING_MOTIVE.getId(this.motive).toString());
         nbt.putByte("Facing", (byte) this.facing.getHorizontal());
         nbt.putByteArray("mapColors", colors);
+        if (!this.getHeldItemStack().isEmpty()) {
+            nbt.put("Item", this.getHeldItemStack().writeNbt(new NbtCompound()));
+        }
         super.writeCustomDataToNbt(nbt);
     }
 
@@ -130,6 +133,11 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         this.motive = Registry.PAINTING_MOTIVE.get(Identifier.tryParse(nbt.getString("Motive")));
         this.facing = Direction.fromHorizontal(nbt.getByte("Facing"));
         this.colors = nbt.getByteArray("mapColors");
+        NbtCompound nbtCompound = nbt.getCompound("Item");
+        if (nbtCompound != null && !nbtCompound.isEmpty()) {
+            ItemStack itemStack = ItemStack.fromNbt(nbtCompound);
+            this.setHeldItemStack(itemStack);
+        }
         setColors(colors);
         super.readCustomDataFromNbt(nbt);
         this.setFacing(this.facing);
