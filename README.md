@@ -1,6 +1,6 @@
 # MC-MetaPainting-Mod
 
-the mod that you can load the image for url  or local path into minecraft.
+the mod that you can load the image for url  or local path into minecraft. [Download Mod](https://github.com/wupengyang1995/MC-MetaPainting-Mod/releases/tag/20200919)
 
 `/createMetaPainting + url`
 
