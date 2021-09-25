@@ -1,5 +1,6 @@
 package net.metacraft.mod.Mixin;
 
+import net.metacraft.mod.MetaEntityType;
 import net.metacraft.mod.PaintingModInitializer;
 import net.metacraft.mod.painting.MetaPaintingEntity;
 import net.metacraft.mod.painting.MetaPaintingSpawnS2CPacket;
@@ -41,8 +42,7 @@ public class MixinClientPlayNetworkHandler{
         Entity entity = entityType.create(this.world);
         if (entity != null) {
             if (packet instanceof MetaPaintingSpawnS2CPacket) {
-                System.out.println("MixinClientPlayNetworkHandler MCPaintingSpawnS2CPacket " + ((MetaPaintingSpawnS2CPacket) packet).getPos().toShortString());
-                entity = new MetaPaintingEntity(PaintingModInitializer.ENTITY_TYPE_META_PAINTING, this.world);
+                entity = new MetaPaintingEntity(MetaEntityType.ENTITY_TYPE_META_PAINTING, this.world);
                 ((MetaPaintingEntity)entity).setAttachmentPos(((MetaPaintingSpawnS2CPacket) packet).getPos());
                 ((MetaPaintingEntity)entity).setFacing(((MetaPaintingSpawnS2CPacket) packet).getFacing());
                 ((MetaPaintingEntity)entity).setMotive(((MetaPaintingSpawnS2CPacket) packet).getMotive());

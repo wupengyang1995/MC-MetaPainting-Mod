@@ -1,11 +1,11 @@
-package net.metacraft.mod;
+package net.metacraft.mod.network;
 
-import net.metacraft.mod.network.MetaPaintingSpawnS2CPacket;
+import net.metacraft.mod.painting.MetaPaintingSpawnS2CPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 
-public enum ClientNetworkManger implements IClientNetworkHandler {
+public enum ClientNetworkCallbackImpl implements IClientNetworkCallback {
 
     /**
      * INSTANCE

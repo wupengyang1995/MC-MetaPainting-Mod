@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.metacraft.mod.MetaEntityType;
 import net.metacraft.mod.MetaItems;
 import net.metacraft.mod.network.NetworkManager;
-import net.metacraft.mod.network.MetaPaintingSpawnS2CPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;

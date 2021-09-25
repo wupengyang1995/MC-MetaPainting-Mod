@@ -3,15 +3,11 @@
 // (powered by FernFlower decompiler)
 //
 
-package net.metacraft.mod.network;
+package net.metacraft.mod.painting;
 
-import net.metacraft.mod.ClientNetworkManger;
-import net.metacraft.mod.painting.MetaPaintingEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
+import net.metacraft.mod.network.ClientNetworkCallbackImpl;
+import net.metacraft.mod.network.Packet;
 import net.minecraft.entity.decoration.painting.PaintingMotive;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.BlockPos;
@@ -20,7 +16,7 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.UUID;
 
-public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements Packet<PlayerEntity> {
+public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements Packet {
     private final int id;
     private final UUID uuid;
     private final BlockPos pos;
@@ -36,7 +32,6 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements 
         this.facing = entity.getHorizontalFacing();
         this.motiveId = Registry.PAINTING_MOTIVE.getRawId(entity.motive);
         this.colors = entity.getColors();
-        System.out.println("MetaPaintingSpawnS2CPacket color " + colors);
     }
 
     public MetaPaintingSpawnS2CPacket(PacketByteBuf buf) {
@@ -77,7 +72,7 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements 
     }
 
     public PaintingMotive getMotive() {
-        return (PaintingMotive) Registry.PAINTING_MOTIVE.get(this.motiveId);
+        return Registry.PAINTING_MOTIVE.get(this.motiveId);
     }
 
     public byte[] getColors() {
@@ -85,8 +80,8 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements 
     }
 
     @Override
-    public void handle(PlayerEntity sender) {
-        ClientNetworkManger.INSTANCE.handleMetaPaintingPacket(this);
+    public void onPacket() {
+        ClientNetworkCallbackImpl.INSTANCE.handleMetaPaintingPacket(this);
     }
 
     @Override
