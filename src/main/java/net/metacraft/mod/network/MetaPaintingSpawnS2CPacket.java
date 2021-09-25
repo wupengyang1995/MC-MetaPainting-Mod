@@ -3,11 +3,16 @@
 // (powered by FernFlower decompiler)
 //
 
-package net.metacraft.mod.painting;
+package net.metacraft.mod.network;
 
+import net.metacraft.mod.ClientNetworkManger;
+import net.metacraft.mod.painting.MetaPaintingEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.painting.PaintingMotive;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -15,7 +20,7 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.UUID;
 
-public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket {
+public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements Packet<PlayerEntity> {
     private final int id;
     private final UUID uuid;
     private final BlockPos pos;
@@ -31,31 +36,29 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket {
         this.facing = entity.getHorizontalFacing();
         this.motiveId = Registry.PAINTING_MOTIVE.getRawId(entity.motive);
         this.colors = entity.getColors();
-        System.out.println("MCPaintingSpawnS2CPacket : " + entity.getColors());
+        System.out.println("MetaPaintingSpawnS2CPacket color " + colors);
     }
 
     public MetaPaintingSpawnS2CPacket(PacketByteBuf buf) {
         super(buf);
         this.id = buf.readVarInt();
         this.uuid = buf.readUuid();
-        this.motiveId = buf.readVarInt();
         this.pos = buf.readBlockPos();
         this.facing = Direction.fromHorizontal(buf.readUnsignedByte());
+        this.motiveId = buf.readVarInt();
         this.colors = buf.readByteArray();
     }
 
     public void write(PacketByteBuf buf) {
+        super.write(buf);
         buf.writeVarInt(this.id);
         buf.writeUuid(this.uuid);
-        buf.writeVarInt(this.motiveId);
         buf.writeBlockPos(this.pos);
         buf.writeByte(this.facing.getHorizontal());
+        buf.writeVarInt(this.motiveId);
         buf.writeByteArray(this.colors);
     }
 
-    public void apply(ClientPlayPacketListener clientPlayPacketListener) {
-        clientPlayPacketListener.onEntitySpawn(this);
-    }
 
     public int getId() {
         return this.id;
@@ -74,10 +77,20 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket {
     }
 
     public PaintingMotive getMotive() {
-        return (PaintingMotive)Registry.PAINTING_MOTIVE.get(this.motiveId);
+        return (PaintingMotive) Registry.PAINTING_MOTIVE.get(this.motiveId);
     }
 
     public byte[] getColors() {
         return colors;
+    }
+
+    @Override
+    public void handle(PlayerEntity sender) {
+        ClientNetworkManger.INSTANCE.handleMetaPaintingPacket(this);
+    }
+
+    @Override
+    public void toBuffer(PacketByteBuf buffer) {
+        write(buffer);
     }
 }

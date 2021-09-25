@@ -1,7 +1,10 @@
 package net.metacraft.mod.painting;
 
 import com.google.common.collect.Lists;
-import net.metacraft.mod.PaintingModInitializer;
+import net.metacraft.mod.MetaEntityType;
+import net.metacraft.mod.MetaItems;
+import net.metacraft.mod.network.NetworkManager;
+import net.metacraft.mod.network.MetaPaintingSpawnS2CPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
@@ -46,11 +49,11 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
     }
 
     public MetaPaintingEntity(EntityType<? extends MetaPaintingEntity> entityType, World world) {
-        super(PaintingModInitializer.ENTITY_TYPE_META_PAINTING, world);
+        super(MetaEntityType.ENTITY_TYPE_META_PAINTING, world);
     }
 
     MetaPaintingEntity(World world, BlockPos pos, Direction direction, byte[] colors) {
-        super(PaintingModInitializer.ENTITY_TYPE_META_PAINTING, world, pos);
+        super(MetaEntityType.ENTITY_TYPE_META_PAINTING, world, pos);
         setColors(colors);
         List<PaintingMotive> list = Lists.newArrayList();
         int i = 0;
@@ -199,11 +202,12 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
     @Override
     public Packet<?> createSpawnPacket() {
-        return new MetaPaintingSpawnS2CPacket(this);
+        return NetworkManager.SERVER_MetaPainting.toPacket(new MetaPaintingSpawnS2CPacket(this));
     }
 
     @Override
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
+        System.out.println("onSpawnPacket");
         BlockPos pos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
         this.attachmentPos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
         setFacing(((MetaPaintingSpawnS2CPacket) packet).getFacing());
@@ -218,6 +222,6 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
     }
 
     protected ItemStack getAsItemStack() {
-        return new ItemStack(PaintingModInitializer.ITEM_META_PAINTING);
+        return new ItemStack(MetaItems.ITEM_META_PAINTING);
     }
 }

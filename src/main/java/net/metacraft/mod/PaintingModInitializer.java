@@ -4,21 +4,16 @@ package net.metacraft.mod;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.metacraft.mod.painting.MetaDecorationItem;
-import net.metacraft.mod.painting.MetaPaintingEntity;
-import net.metacraft.mod.renderer.MapRenderer;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
+import net.metacraft.mod.network.NetworkManager;
+import net.metacraft.mod.painting.MetaDecorationItem;
+import net.metacraft.mod.renderer.MapRenderer;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -27,21 +22,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class PaintingModInitializer implements net.fabricmc.api.ModInitializer {
-
-	private static final String ENTITY_TYPE_ID = "entity_meta_painting";
-
-	private static final String ITEM_NAMESPACE = "item_meta_painting";
-
-	public static final EntityType<MetaPaintingEntity> ENTITY_TYPE_META_PAINTING = Registry.register(
-			Registry.ENTITY_TYPE,
-			ENTITY_TYPE_ID,
-			EntityType.Builder.create(MetaPaintingEntity::new, SpawnGroup.MISC).setDimensions(0.5F, 0.5F).maxTrackingRange(10).trackingTickInterval(2147483647).build(ENTITY_TYPE_ID));;
-
-	public static final Item ITEM_META_PAINTING = Registry.register(Registry.ITEM, new Identifier("metapainting", "meta_painting"), new MetaDecorationItem(ENTITY_TYPE_META_PAINTING, (new Item.Settings()).maxCount(1).group(ItemGroup.DECORATIONS)));
+public class PaintingModInitializer implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		MetaItems.init();
+		MetaEntityType.init();
+		NetworkManager.init();
+
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			dispatcher.register(CommandManager.literal("createMetaPainting")
 					.requires(source -> source.hasPermissionLevel(1))
@@ -79,15 +67,13 @@ public class PaintingModInitializer implements net.fabricmc.api.ModInitializer {
 		}
 
 		source.sendFeedback(new LiteralText("success!"), false);
-		ItemStack stack = new ItemStack(ITEM_META_PAINTING);
-		((MetaDecorationItem) ITEM_META_PAINTING).saveColor(stack, MapRenderer.render(image));
+		ItemStack stack = new ItemStack(MetaItems.ITEM_META_PAINTING);
+		((MetaDecorationItem) MetaItems.ITEM_META_PAINTING).saveColor(stack, MapRenderer.render(image));
         if (!player.getInventory().insertStack(stack)) {
 			player.dropItem(stack, false);
         }
 		return 1;
 	}
-
-
 
 	private static boolean isValid(String url) {
 		try {
