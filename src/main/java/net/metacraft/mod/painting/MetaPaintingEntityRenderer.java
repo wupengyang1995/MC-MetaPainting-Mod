@@ -1,9 +1,12 @@
 package net.metacraft.mod.painting;
 
+import net.metacraft.mod.utils.Constants;
+import net.minecraft.block.MapColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.PaintingManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
@@ -16,9 +19,31 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
 
     private final MinecraftClient client = MinecraftClient.getInstance();
 
+    private final NativeImageBackedTexture texture;
+
+    private final RenderLayer renderLayer;
+
     public MetaPaintingEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
+        texture = new NativeImageBackedTexture(Constants.TEXTURE_WEIGHT, Constants.TEXTURE_HEIGHT, true);
+        Identifier identifier = client.getTextureManager().registerDynamicTexture("painting/1", this.texture);
+        this.renderLayer = RenderLayer.getText(identifier);
         System.out.println("MCPaintingEntityRenderer  init");
+    }
+
+    private void updateTexture(byte[] colors) {
+        for(int i = 0; i < Constants.TEXTURE_WEIGHT; ++i) {
+            for(int j = 0; j < Constants.TEXTURE_HEIGHT; ++j) {
+                int k = j + i * Constants.TEXTURE_WEIGHT;
+                int l = colors[k] & 255;
+                if (l / 4 == 0) {
+                    this.texture.getImage().setPixelColor(j, i, 0);
+                } else {
+                    this.texture.getImage().setPixelColor(j, i, MapColor.COLORS[l / 4].getRenderColor(l & 3));
+                }
+            }
+        }
+        this.texture.upload();
     }
 
     @Override
@@ -51,15 +76,25 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
         float factor = 1 / 132f;
         float weightScale = (paintingMotive.getWidth() / 16f);
         float heightScale = (paintingMotive.getHeight() / 16f);
-        matrixStack.translate(-0.5 * weightScale * (factor) * 128, -0.5 * heightScale * (factor) * 128, -0.04);
+        matrixStack.translate(-0.5 * weightScale * (factor) * Constants.TEXTURE_WEIGHT, -0.5 * heightScale * (factor) * Constants.TEXTURE_HEIGHT, -0.04);
         matrixStack.scale(factor * weightScale, factor * heightScale, factor * weightScale);
         int light = 15728850;
-        MapState state = paintingEntity.mapState;
-        if (state != null) {
-            this.client.gameRenderer.getMapRenderer().draw(matrixStack, vertexConsumerProvider, 9999, state, true, light);
+        byte[] colors = paintingEntity.getColors();
+        if (colors != null) {
+            updateTexture(colors);
+            paintingTexture(matrixStack, vertexConsumerProvider, light);
         }
         matrixStack.pop();
         super.render(paintingEntity, f, g, matrixStack, vertexConsumerProvider, i);
+    }
+
+    private void paintingTexture(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light) {
+        Matrix4f matrix4f = matrixStack.peek().getModel();
+        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(this.renderLayer);
+        vertexConsumer.vertex(matrix4f, 0.0F, 128.0F, -0.01F).color(255, 255, 255, 255).texture(0.0F, 1.0F).light(light).next();
+        vertexConsumer.vertex(matrix4f, 128.0F, 128.0F, -0.01F).color(255, 255, 255, 255).texture(1.0F, 1.0F).light(light).next();
+        vertexConsumer.vertex(matrix4f, 128.0F, 0.0F, -0.01F).color(255, 255, 255, 255).texture(1.0F, 0.0F).light(light).next();
+        vertexConsumer.vertex(matrix4f, 0.0F, 0.0F, -0.01F).color(255, 255, 255, 255).texture(0.0F, 0.0F).light(light).next();
     }
 
     public Identifier getTexture(MetaPaintingEntity paintingEntity) {

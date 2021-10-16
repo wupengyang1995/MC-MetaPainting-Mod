@@ -37,8 +37,6 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
     public PaintingMotive motive;
 
-    public MapState mapState;
-
     static {
         ITEM_STACK = DataTracker.registerData(MetaPaintingEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
     }
@@ -95,18 +93,6 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
     public void setColors(byte[] colors) {
         this.colors = colors;
-        if (mapState == null) {
-            NbtCompound nbt = new NbtCompound();
-            nbt.putString("dimension", world.getRegistryKey().getValue().toString());
-            nbt.putInt("xCenter", 0);
-            nbt.putInt("zCenter", 0);
-            nbt.putBoolean("locked", true);
-            nbt.putBoolean("unlimitedTracking", false);
-            nbt.putBoolean("trackingPosition", false);
-            nbt.putByte("scale", (byte) 3);
-            mapState = MapState.fromNbt(nbt);
-            mapState.colors = colors;
-        }
     }
 
     public void setAttachmentPos(BlockPos pos) {

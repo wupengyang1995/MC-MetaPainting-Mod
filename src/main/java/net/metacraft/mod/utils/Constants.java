@@ -5,4 +5,8 @@ public final class Constants {
     }
 
     public static final String MOD_ID = "metapainting";
+
+    public static final int TEXTURE_WEIGHT = 128;
+
+    public static final int TEXTURE_HEIGHT = 128;
 }
